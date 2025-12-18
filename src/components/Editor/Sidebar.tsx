@@ -115,7 +115,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
     // Không setTab ở đây, chỉ điều hướng.
     const target =
       newValue === "Note"
-        ? "/content/editor"
+        ? "/content/editor/67fdb5f7a429e9c91a8eb8b68a4f64d5"
         : newValue === "Files"
         ? "/content/files"
         : "/content/chat";
