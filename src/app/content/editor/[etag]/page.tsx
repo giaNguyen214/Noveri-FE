@@ -14,6 +14,30 @@ import { useUserStore } from "@/stores/userStore";
 const MAIN_BG_URL = "/assets/sea9.png";
 const MENU_ICON_URL = "/assets/starfish.png";
 
+function normalizePreviewUrl(previewUrl: string) {
+  const apiBase = process.env.NEXT_PUBLIC_API;
+  if (!apiBase) return previewUrl;
+
+  try {
+    const u = new URL(previewUrl);
+    const api = new URL(apiBase);
+
+    if (u.hostname === "localhost" || u.hostname === "127.0.0.1") {
+      u.protocol = api.protocol;
+      u.hostname = api.hostname; // chỉ hostname
+      u.port = ""; // xoá port
+      return u.toString();
+    }
+
+    return previewUrl;
+  } catch {
+    if (previewUrl.startsWith("/")) {
+      return `${apiBase}${previewUrl}`;
+    }
+    return previewUrl;
+  }
+}
+
 function App() {
   const { toggleSidebar } = useSidebar();
 
@@ -41,12 +65,14 @@ function App() {
         console.log(metadataUrl);
 
         const metadataData = await metadataRes.json();
-        console.log("Preview URL:", metadataData.preview_url);
 
-        const contentRes = await fetch(metadataData.preview_url);
+        const fixedPreviewUrl = normalizePreviewUrl(metadataData.preview_url);
+        console.log("Fixed Preview URL:", fixedPreviewUrl);
+
+        const contentRes = await fetch(fixedPreviewUrl);
         const contentText = await contentRes.text();
 
-        setMetadata(metadataData);
+        setMetadata({ ...metadataData, preview_url: fixedPreviewUrl });
         setContent(contentText);
       } catch (e) {
         console.error("Failed to load content or metadata", e);

@@ -9,10 +9,6 @@ import LinkIcon from "@mui/icons-material/Link";
 import ArticleIcon from "@mui/icons-material/Article";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome"; // Hoặc icon này cho đẹp
 
-const systemPrompt = await fetch("/prompts/factual_check.txt").then((r) =>
-  r.text()
-);
-
 // Hàm lấy ID video từ link youtube bất kỳ
 const getYoutubeId = (url: any) => {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -160,6 +156,15 @@ export async function saveToSupabase(user_id: string, session_id: string) {
 }
 
 const TextEditor = ({ content }: any) => {
+  const [systemPrompt, setSystemPrompt] = useState<string>("");
+
+  useEffect(() => {
+    fetch("/prompts/factual_check.txt")
+      .then((r) => r.text())
+      .then(setSystemPrompt)
+      .catch(console.error);
+  }, []);
+
   const [markdown, setMarkdown] = useState(content || initialMarkdown);
 
   const [showSidebar, setShowSidebar] = useState(true);
@@ -189,7 +194,11 @@ const TextEditor = ({ content }: any) => {
   const [relations, setRelations] = useState<any[]>([]); // Mặc định là mảng rỗng
   const [isLoadingRelated, setIsLoadingRelated] = useState(false);
 
-  const notebook_id = localStorage.getItem("notebook_id");
+  const [notebookId, setNotebookId] = useState<string | null>(null);
+  useEffect(() => {
+    const id = localStorage.getItem("notebook_id");
+    setNotebookId(id);
+  }, []);
 
   const getSourcesListAndString = async () => {
     const url = `${process.env.NEXT_PUBLIC_API_NOTEBOOK}/api/sources`;
@@ -910,7 +919,7 @@ const TextEditor = ({ content }: any) => {
         title: noteTitle,
         content: markdown,
         note_type: "human",
-        notebook_id: notebook_id,
+        notebook_id: notebookId,
       };
 
       // ---- 3. Chạy song song 2 API ----
