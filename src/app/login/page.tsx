@@ -50,7 +50,7 @@ export default function HomePage() {
       localStorage.setItem("notebook_id", result.session.user.notebook_id);
       localStorage.setItem("access_token", result.session.access_token);
 
-      router.push("/content/editor");
+      router.push("/content/editor/67fdb5f7a429e9c91a8eb8b68a4f64d5");
     } catch (err) {
       toast.error("An unexpected error occurred. Please try again.");
     }
