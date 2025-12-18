@@ -136,6 +136,18 @@ import { initialMarkdown } from "./initialMarkdown";
 import { useFileStore } from "@/stores/fileStore";
 import { useUserStore } from "@/stores/userStore";
 
+function getChatSessionByUrl() {
+  if (typeof window === "undefined") return null;
+
+  const urlId = window.location.pathname.split("/").pop();
+
+  if (urlId === "67fdb5f7a429e9c91a8eb8b68a4f64d5") {
+    return "chat_session:3h3k3jftuc2rbypfz848";
+  }
+
+  return "chat_session:9cikcp23p2itm1npo4jq";
+}
+
 export async function saveToSupabase(user_id: string, session_id: string) {
   const { data, error } = await supabase
     .from("history_result") // ← đổi tên theo bảng thật của bạn
@@ -427,7 +439,7 @@ const TextEditor = ({ content }: any) => {
       setLoadingHistory(true);
 
       try {
-        const sessionId = "chat_session:9cikcp23p2itm1npo4jq";
+        const sessionId = getChatSessionByUrl();
 
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_NOTEBOOK}/api/chat/sessions/${sessionId}`
