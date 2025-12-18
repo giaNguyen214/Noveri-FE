@@ -44,6 +44,29 @@ function MarkdownPreview({ blob }: { blob: Blob }) {
   );
 }
 
+function normalizePreviewUrl(previewUrl: string) {
+  const apiBase = process.env.NEXT_PUBLIC_API;
+  if (!apiBase) return previewUrl;
+
+  try {
+    const u = new URL(previewUrl);
+    const api = new URL(apiBase);
+
+    if (u.hostname === "localhost" || u.hostname === "127.0.0.1") {
+      u.protocol = api.protocol;
+      u.hostname = api.hostname; // chỉ hostname
+      u.port = ""; // xoá port
+      return u.toString();
+    }
+
+    return previewUrl;
+  } catch {
+    if (previewUrl.startsWith("/")) {
+      return `${apiBase}${previewUrl}`;
+    }
+    return previewUrl;
+  }
+}
 function Files() {
   const { toggleSidebar } = useSidebar();
 
@@ -97,7 +120,7 @@ function Files() {
       // TEXT
       if (file.file_name?.endsWith(".txt")) {
         setSelectedFile({ ...file, type: "text" });
-        const res = await fetch(file.preview_url);
+        const res = await fetch(normalizePreviewUrl(file.preview_url));
         const blob = await res.blob();
         setFileBlob(blob);
         setOpenDialog(true);
@@ -106,7 +129,7 @@ function Files() {
 
       // FILE
       setSelectedFile(file);
-      const res = await fetch(file.preview_url);
+      const res = await fetch(normalizePreviewUrl(file.preview_url));
       const blob = await res.blob();
       setFileBlob(blob);
       setOpenDialog(true);
@@ -175,6 +198,14 @@ function Files() {
             `${process.env.NEXT_PUBLIC_API}/files/metadata/document?user_id=${user_id}`
           ),
         ]);
+
+        console.log("Fetching notes and documents metadata");
+        console.log(
+          `${process.env.NEXT_PUBLIC_API}/files/metadata/note?user_id=${user_id}`
+        );
+        console.log(
+          `${process.env.NEXT_PUBLIC_API}/files/metadata/document?user_id=${user_id}`
+        );
 
         const [noteData, docData] = await Promise.all([
           noteRes.json(),
